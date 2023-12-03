@@ -1,51 +1,76 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
+
+from rest_framework import status, generics
 from movie_app.models import Director, Movie, Review
 from movie_app.serializers import DirectorSerializer, MovieSerializer, ReviewSerializer
+from rest_framework.views import APIView
+from django.db.models import Avg, Count
+from rest_framework.response import Response
 
 
-@api_view(['GET'])
-def director_list_api_view(request):
-    director = Director.objects.all()
-    data = DirectorSerializer(instance=director, many=True).data
-    return Response(data=data)
+class MovieWithReviewsView(generics.ListAPIView):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
 
 
-@api_view(['GET'])
-def director_detail_api_view(request, id):
-    director = Director.objects.get(id=id)
-    data = DirectorSerializer(instance=director, many=False).data
-    return Response(data=data)
+        data = []
+        for movie_data in serializer.data:
+            movie_id = movie_data['id']
+            reviews = Review.objects.filter(movie_id=movie_id)
+            review_serializer = ReviewSerializer(reviews, many=True)
+            movie_data['reviews'] = review_serializer.data
+            data.append(movie_data)
+
+        return Response(data)
 
 
-@api_view(['GET'])
-def movie_list_api_view(request):
-    movie = Movie.objects.all()
-    data = MovieSerializer(instance=movie, many=True).data
-    return Response(data=data)
+class AverageRatingView(generics.ListAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+    def list(self, request, *args, **kwargs):
+        average_rating = Review.objects.aggregate(Avg('stars'))['stars__avg']
+        return Response({'average_rating': average_rating})
 
 
-@api_view(['GET'])
-def movie_detail_api_view(request, id):
-    movie = Movie.objects.get(id=id)
-    data = MovieSerializer(instance=movie, many=False).data
-    return Response(data=data)
+class DirectorWithMoviesCountView(generics.ListAPIView):
+    queryset = Director.objects.annotate(movies_count=Count('movie'))
+    serializer_class = DirectorSerializer
 
 
-@api_view(['GET'])
-def review_list_api_view(request):
-    review = Review.objects.all()
-    data = ReviewSerializer(instance=review, many=True).data
-    return Response(data=data)
+class DirectorListView(generics.ListAPIView):
+    queryset = Director.objects.all()
+    serializer_class = DirectorSerializer
 
 
-@api_view(['GET'])
-def review_detail_api_view(request, id):
-    review = Review.objects.get(id=id)
-    data = ReviewSerializer(instance=review, many=False).data
-    return Response(data=data)
+class DirectorDetailView(generics.RetrieveAPIView):
+    queryset = Director.objects.all()
+    serializer_class = DirectorSerializer
+
+
+class MovieListView(generics.ListAPIView):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
+
+
+class MovieDetailView(generics.RetrieveAPIView):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
+
+
+class ReviewListView(generics.ListAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+
+class ReviewDetailView(generics.RetrieveAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
 
 
 @api_view(['GET', 'POST'])
@@ -62,5 +87,31 @@ def test_api_view(request):
                     data=dict_)
 
 
+class DirectorCreateView(generics.CreateAPIView):
+    queryset = Director.objects.all()
+    serializer_class = DirectorSerializer
 
 
+class DirectorUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Director.objects.all()
+    serializer_class = DirectorSerializer
+
+
+class MovieCreateView(generics.CreateAPIView):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
+
+
+class MovieUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
+
+
+class ReviewCreateView(generics.CreateAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+
+class ReviewUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
