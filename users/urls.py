@@ -4,11 +4,11 @@ from users import views
 
 
 urlpatterns = [
-    path('login/', views.login),
-    path('logout/', views.logout),
+    path('login/', views.LoginAPIView.as_view()),
+    path('logout/', views.LogoutAPIView),
 
-    path('register/', views.register),
-    path('profile/', views.profile),
+    path('register/', views.RegisterView),
+    path('profile/', views.ProfileView),
 
-    path('confrom/', views.user_confirmation_view)
+    path('confin/', views.UserConfirmationView)
 ]

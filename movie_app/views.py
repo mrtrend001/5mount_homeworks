@@ -2,6 +2,8 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import status, generics
 from movie_app.models import Director, Movie, Review
@@ -14,6 +16,8 @@ from rest_framework.response import Response
 class MovieWithReviewsView(generics.ListAPIView):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter, OrderingFilter]
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -34,6 +38,8 @@ class MovieWithReviewsView(generics.ListAPIView):
 class AverageRatingView(generics.ListAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter, OrderingFilter]
 
     def list(self, request, *args, **kwargs):
         average_rating = Review.objects.aggregate(Avg('stars'))['stars__avg']
@@ -43,16 +49,21 @@ class AverageRatingView(generics.ListAPIView):
 class DirectorWithMoviesCountView(generics.ListAPIView):
     queryset = Director.objects.annotate(movies_count=Count('movie'))
     serializer_class = DirectorSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter, OrderingFilter]
 
 
 class DirectorListView(generics.ListAPIView):
     queryset = Director.objects.all()
     serializer_class = DirectorSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter, OrderingFilter]
 
 
 class DirectorDetailView(generics.RetrieveAPIView):
     queryset = Director.objects.all()
     serializer_class = DirectorSerializer
+
 
 
 class MovieListView(generics.ListAPIView):
@@ -68,6 +79,8 @@ class MovieDetailView(generics.RetrieveAPIView):
 class ReviewListView(generics.ListAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter, OrderingFilter]
 
 
 class ReviewDetailView(generics.RetrieveAPIView):
@@ -92,7 +105,8 @@ def test_api_view(request):
 class DirectorCreateView(generics.CreateAPIView):
     queryset = Director.objects.all()
     serializer_class = DirectorSerializer
-
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter, OrderingFilter]
 
 class DirectorUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Director.objects.all()

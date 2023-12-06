@@ -7,13 +7,13 @@ urlpatterns = [
     path('test/', views.test_api_view),
 
     path('directors/', views.DirectorListView.as_view()),
-    path('directors/<int:id>/', views.DirectorDetailView.as_view()),
+    path('directors/<int:pk>/', views.DirectorDetailView.as_view()),
 
     path('movies/', views.MovieListView.as_view()),
-    path('movies/<int:id>/', views.MovieDetailView.as_view()),
+    path('movies/<int:pk>/', views.MovieDetailView.as_view()),
 
     path('reviews/', views.ReviewListView.as_view()),
-    path('reviews/<int:id>/', views.ReviewDetailView.as_view()),
+    path('reviews/<int:pk>/', views.ReviewDetailView.as_view()),
 
     path('movies/reviews/', views.MovieWithReviewsView.as_view(), name='movie-reviews'),
     path('average-rating/', views.AverageRatingView.as_view(), name='average-rating'),
