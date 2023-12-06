@@ -52,7 +52,7 @@ class Movie(models.Model):
     director = models.ForeignKey(Director, on_delete=models.CASCADE)
 
     def clean(self):
-        if self.director_id is not None and not Director.objects.filter(pk=self.director_id).exists():
+        if self.director is not None and not Director.objects.filter(pk=self.director_id).exists():
             raise ValidationError({'director': 'Invalid director ID'})
 
 
